@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2-history-viewer
+  labels:
+    app: app2-history-viewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2-history-viewer
+  template:
+    metadata:
+      labels:
+        app: app2-history-viewer
+    spec:
+      containers:
+        - name: app2
+          image: registry.gitlab.com/REPLACE_ORG/s25504_kafka/app2-history-viewer:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: ADD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stock-api-key
+                  key: ADD_API_KEY
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 10
