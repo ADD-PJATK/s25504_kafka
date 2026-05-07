@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock Realtime Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body { background: #0d1117; color: #c9d1d9; }
+        .sidebar { background: #161b22; border-right: 1px solid #30363d; min-height: 100vh; padding: 1rem; }
+        .main-panel { padding: 1.5rem; }
+        .card { background: #161b22; border: 1px solid #30363d; }
+        .card-header { background: #21262d; border-bottom: 1px solid #30363d; }
+        .table { color: #c9d1d9; }
+        .table-hover tbody tr:hover { background: #21262d; }
+        .badge-up { color: #3fb950; }
+        .badge-down { color: #f85149; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-connected { background: #3fb950; }
+        .status-disconnected { background: #f85149; }
+        .ticker-item { cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+        .ticker-item:hover { background: #21262d; }
+        #search { background: #0d1117; color: #c9d1d9; border-color: #30363d; }
+        #search::placeholder { color: #8b949e; }
+        canvas { max-height: 360px; }
+        .form-check-input { background-color: #0d1117; border-color: #30363d; }
+        .form-check-input:checked { background-color: #1f6feb; border-color: #1f6feb; }
+    </style>
+</head>
+<body>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <h5 class="mb-3 text-white">
+                <svg width="20" height="20" fill="currentColor" class="me-2 text-success" viewBox="0 0 16 16">
+                    <path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Realtime Dashboard
+            </h5>
+
+            <div class="mb-3">
+                <span class="status-dot status-disconnected" id="status-dot"></span>
+                <small id="status-text" class="text-muted">Disconnected</small>
+            </div>
+
+            <input type="text" id="search" class="form-control form-control-sm mb-2" placeholder="Search tickers...">
+
+            <div style="max-height: 55vh; overflow-y: auto;" id="ticker-list">
+                <div class="text-muted small">Loading tickers…</div>
+            </div>
+
+            <div class="d-grid gap-2 mt-3">
+                <button id="btn-connect" class="btn btn-success btn-sm">Connect</button>
+                <button id="btn-disconnect" class="btn btn-outline-danger btn-sm" disabled>Disconnect</button>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted">Last update: <span id="last-update">—</span></small>
+            </div>
+        </div>
+
+        <!-- Main panel -->
+        <div class="col-md-9 main-panel">
+
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Price Chart <small class="text-muted">(last 30 ticks per ticker)</small></span>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-clear-chart">Clear</button>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Live Prices</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Price (PLN)</th>
+                                <th>Change</th>
+                                <th>Volume</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="price-table-body">
+                            <tr><td colspan="5" class="text-center text-muted py-4">Select tickers and click Connect</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    // ── State ─────────────────────────────────────────────────────────────────
+    let eventSource = null;
+    const MAX_HISTORY = 30;
+    // ticker -> { price, prevPrice, volume, ts, history: [{x, y}] }
+    const tickerData = {};
+    const CHART_COLORS = [
+        '#58a6ff','#3fb950','#f78166','#d2a8ff','#ffa657',
+        '#79c0ff','#56d364','#ff7b72','#bc8cff','#ffc680'
+    ];
+    let colorIdx = 0;
+    const tickerColors = {};
+
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: [] },
+        options: {
+            animation: false,
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { color: '#c9d1d9' } } },
+            scales: {
+                x: {
+                    type: 'category',
+                    ticks: { color: '#8b949e', maxTicksLimit: 8, maxRotation: 0 },
+                    grid: { color: '#21262d' }
+                },
+                y: {
+                    ticks: { color: '#8b949e' },
+                    grid: { color: '#21262d' }
+                }
+            }
+        }
+    });
+
+    function getColor(ticker) {
+        if (!tickerColors[ticker]) {
+            tickerColors[ticker] = CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+        }
+        return tickerColors[ticker];
+    }
+
+    function updateChart(ticker, ts, price) {
+        const label = ts.substring(11, 19); // HH:MM:SS
+        let dataset = chart.data.datasets.find(d => d.label === ticker);
+        if (!dataset) {
+            dataset = {
+                label: ticker,
+                data: [],
+                borderColor: getColor(ticker),
+                backgroundColor: 'transparent',
+                tension: 0.3,
+                pointRadius: 2
+            };
+            chart.data.datasets.push(dataset);
+        }
+        dataset.data.push({ x: label, y: price });
+        if (dataset.data.length > MAX_HISTORY) dataset.data.shift();
+        chart.update('none');
+    }
+
+    // ── Table ─────────────────────────────────────────────────────────────────
+    function updateTable(tick) {
+        const prev = tickerData[tick.ticker];
+        const change = prev ? (tick.price - prev.price).toFixed(2) : null;
+        tickerData[tick.ticker] = tick;
+
+        const tbody = document.getElementById('price-table-body');
+        let row = document.getElementById('row-' + tick.ticker);
+        if (!row) {
+            row = document.createElement('tr');
+            row.id = 'row-' + tick.ticker;
+            tbody.appendChild(row);
+        }
+
+        const changeHtml = change === null ? '—'
+            : parseFloat(change) > 0
+                ? `<span class="badge-up">▲ ${change}</span>`
+                : parseFloat(change) < 0
+                    ? `<span class="badge-down">▼ ${change}</span>`
+                    : `<span class="text-muted">— ${change}</span>`;
+
+        row.innerHTML = `
+            <td><strong style="color:${getColor(tick.ticker)}">${tick.ticker}</strong></td>
+            <td>${parseFloat(tick.price).toFixed(2)}</td>
+            <td>${changeHtml}</td>
+            <td>${tick.volume ?? '—'}</td>
+            <td><small class="text-muted">${tick.ts ? tick.ts.substring(11,19) : '—'}</small></td>
+        `;
+    }
+
+    // ── Ticker list ───────────────────────────────────────────────────────────
+    let allTickers = [];
+
+    async function loadTickers() {
+        try {
+            const res = await fetch('/dashboard/tickers');
+            const json = await res.json();
+            allTickers = json.tickers || [];
+            renderTickerList(allTickers);
+        } catch (e) {
+            document.getElementById('ticker-list').innerHTML =
+                '<div class="text-danger small">Failed to load tickers</div>';
+        }
+    }
+
+    function renderTickerList(tickers) {
+        const list = document.getElementById('ticker-list');
+        list.innerHTML = tickers.map(t => `
+            <div class="ticker-item form-check">
+                <input class="form-check-input ticker-cb" type="checkbox" value="${t}" id="cb-${t}">
+                <label class="form-check-label small" for="cb-${t}">${t}</label>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('search').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        renderTickerList(allTickers.filter(t => t.toLowerCase().includes(q)));
+    });
+
+    function selectedTickers() {
+        return [...document.querySelectorAll('.ticker-cb:checked')].map(cb => cb.value);
+    }
+
+    // ── SSE Connection ────────────────────────────────────────────────────────
+    function setStatus(connected) {
+        const dot = document.getElementById('status-dot');
+        const txt = document.getElementById('status-text');
+        dot.className = 'status-dot ' + (connected ? 'status-connected' : 'status-disconnected');
+        txt.textContent = connected ? 'Connected' : 'Disconnected';
+        document.getElementById('btn-connect').disabled = connected;
+        document.getElementById('btn-disconnect').disabled = !connected;
+    }
+
+    document.getElementById('btn-connect').addEventListener('click', () => {
+        const tickers = selectedTickers();
+        if (tickers.length === 0) {
+            alert('Please select at least one ticker.');
+            return;
+        }
+        if (eventSource) eventSource.close();
+
+        const params = tickers.map(t => `tickers=${encodeURIComponent(t)}`).join('&');
+        eventSource = new EventSource(`/dashboard/stream?${params}`);
+
+        eventSource.addEventListener('tick', e => {
+            try {
+                const tick = JSON.parse(e.data);
+                updateTable(tick);
+                updateChart(tick.ticker, tick.ts, tick.price);
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            } catch (_) {}
+        });
+
+        eventSource.onopen = () => setStatus(true);
+        eventSource.onerror = () => setStatus(false);
+    });
+
+    document.getElementById('btn-disconnect').addEventListener('click', () => {
+        if (eventSource) { eventSource.close(); eventSource = null; }
+        setStatus(false);
+    });
+
+    document.getElementById('btn-clear-chart').addEventListener('click', () => {
+        chart.data.datasets = [];
+        chart.update();
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadTickers();
+</script>
+</body>
+</html>
