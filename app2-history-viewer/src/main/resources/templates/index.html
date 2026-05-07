@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock History Viewer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body { background: #0d1117; color: #c9d1d9; }
+        .sidebar { background: #161b22; border-right: 1px solid #30363d; min-height: 100vh; padding: 1rem; }
+        .main-panel { padding: 1.5rem; }
+        .card { background: #161b22; border: 1px solid #30363d; }
+        .card-header { background: #21262d; border-bottom: 1px solid #30363d; }
+        .table { color: #c9d1d9; }
+        .table-hover tbody tr:hover { background: #21262d; }
+        .form-control, .form-range { background: #0d1117; color: #c9d1d9; border-color: #30363d; }
+        .form-control::placeholder { color: #8b949e; }
+        .form-check-input { background-color: #0d1117; border-color: #30363d; }
+        .form-check-input:checked { background-color: #1f6feb; border-color: #1f6feb; }
+        canvas { max-height: 360px; }
+        #ticker-list { max-height: 45vh; overflow-y: auto; }
+        .badge-count { font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <h5 class="mb-3 text-white">
+                <svg width="20" height="20" fill="currentColor" class="me-2 text-info" viewBox="0 0 16 16">
+                    <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/>
+                </svg>
+                History Viewer
+            </h5>
+
+            <p class="text-muted small mb-2">Polled every 10 s. Select tickers and a time range, then click <strong>Fetch Data</strong>.</p>
+
+            <div id="ticker-list" class="mb-3">
+                <div class="text-muted small">Loading…</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small">
+                    Time range: <strong id="range-display">5</strong> min
+                </label>
+                <input type="range" class="form-range" id="time-range" min="1" max="10" value="5">
+            </div>
+
+            <div class="d-grid gap-2">
+                <button id="btn-fetch" class="btn btn-info btn-sm">Fetch Data</button>
+            </div>
+
+            <hr style="border-color:#30363d">
+
+            <p class="text-muted small mb-1">Export fetched data:</p>
+            <div class="d-grid gap-2">
+                <button id="btn-csv" class="btn btn-outline-success btn-sm" disabled>Download CSV</button>
+                <button id="btn-json" class="btn btn-outline-warning btn-sm" disabled>Download JSON</button>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted">Records: <span id="record-count">—</span></small>
+            </div>
+        </div>
+
+        <!-- Main panel -->
+        <div class="col-md-9 main-panel">
+
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">Price History Chart</div>
+                        <div class="card-body">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Data Table</span>
+                    <small class="text-muted" id="fetch-info">No data loaded yet</small>
+                </div>
+                <div class="card-body p-0" style="max-height:400px; overflow-y:auto;">
+                    <table class="table table-hover mb-0 table-sm">
+                        <thead style="position:sticky;top:0;background:#21262d;">
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Timestamp</th>
+                                <th>Price (PLN)</th>
+                                <th>Volume</th>
+                                <th>Seq</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <tr><td colspan="5" class="text-center text-muted py-4">No data — click "Fetch Data"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    // ── State ─────────────────────────────────────────────────────────────────
+    let lastFetchedData = [];
+    let lastTickers = [];
+    let lastMinutes = 5;
+
+    const CHART_COLORS = [
+        '#58a6ff','#3fb950','#f78166','#d2a8ff','#ffa657',
+        '#79c0ff','#56d364','#ff7b72','#bc8cff','#ffc680'
+    ];
+    const tickerColorMap = {};
+    let colorIdx = 0;
+
+    function colorFor(ticker) {
+        if (!tickerColorMap[ticker]) {
+            tickerColorMap[ticker] = CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+        }
+        return tickerColorMap[ticker];
+    }
+
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    const historyChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: [] },
+        options: {
+            animation: false,
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { color: '#c9d1d9' } } },
+            scales: {
+                x: {
+                    type: 'category',
+                    ticks: { color: '#8b949e', maxTicksLimit: 10, maxRotation: 45 },
+                    grid: { color: '#21262d' }
+                },
+                y: {
+                    ticks: { color: '#8b949e' },
+                    grid: { color: '#21262d' }
+                }
+            }
+        }
+    });
+
+    function renderChart(ticks) {
+        const byTicker = {};
+        ticks.forEach(tick => {
+            if (!byTicker[tick.ticker]) byTicker[tick.ticker] = [];
+            byTicker[tick.ticker].push({ x: tick.ts.substring(11, 19), y: parseFloat(tick.price) });
+        });
+
+        historyChart.data.datasets = Object.entries(byTicker).map(([ticker, points]) => ({
+            label: ticker,
+            data: points,
+            borderColor: colorFor(ticker),
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 3
+        }));
+        historyChart.update();
+    }
+
+    // ── Table ─────────────────────────────────────────────────────────────────
+    function renderTable(ticks) {
+        const tbody = document.getElementById('data-table-body');
+        if (ticks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No ticks in this time range yet — the poller accumulates data over time.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = ticks.map(t => `
+            <tr>
+                <td><strong style="color:${colorFor(t.ticker)}">${t.ticker}</strong></td>
+                <td><small>${t.ts}</small></td>
+                <td>${parseFloat(t.price).toFixed(2)}</td>
+                <td>${t.volume ?? '—'}</td>
+                <td><small class="text-muted">${t.seq ?? '—'}</small></td>
+            </tr>
+        `).join('');
+    }
+
+    // ── Ticker list ───────────────────────────────────────────────────────────
+    async function loadTrackedTickers() {
+        try {
+            const res = await fetch('/history/tickers');
+            const tickers = await res.json();
+            const list = document.getElementById('ticker-list');
+            list.innerHTML = tickers.map(t => `
+                <div class="form-check">
+                    <input class="form-check-input ticker-cb" type="checkbox" value="${t}" id="cb-${t}" checked>
+                    <label class="form-check-label small" for="cb-${t}">${t}</label>
+                </div>
+            `).join('');
+        } catch (e) {
+            document.getElementById('ticker-list').innerHTML =
+                '<div class="text-danger small">Failed to load tickers</div>';
+        }
+    }
+
+    function selectedTickers() {
+        return [...document.querySelectorAll('.ticker-cb:checked')].map(cb => cb.value);
+    }
+
+    // ── Time range slider ─────────────────────────────────────────────────────
+    document.getElementById('time-range').addEventListener('input', function () {
+        document.getElementById('range-display').textContent = this.value;
+    });
+
+    // ── Fetch ─────────────────────────────────────────────────────────────────
+    document.getElementById('btn-fetch').addEventListener('click', async () => {
+        const tickers = selectedTickers();
+        const minutes = parseInt(document.getElementById('time-range').value);
+
+        if (tickers.length === 0) { alert('Select at least one ticker.'); return; }
+
+        lastTickers = tickers;
+        lastMinutes = minutes;
+
+        const btn = document.getElementById('btn-fetch');
+        btn.disabled = true;
+        btn.textContent = 'Loading…';
+
+        try {
+            const params = tickers.map(t => `tickers=${encodeURIComponent(t)}`).join('&');
+            const res = await fetch(`/history/data?${params}&minutes=${minutes}`);
+            const json = await res.json();
+
+            lastFetchedData = json.data || [];
+            document.getElementById('record-count').textContent = lastFetchedData.length;
+            document.getElementById('fetch-info').textContent =
+                `${lastFetchedData.length} ticks — last ${minutes} min — ${new Date().toLocaleTimeString()}`;
+
+            renderChart(lastFetchedData);
+            renderTable(lastFetchedData);
+
+            document.getElementById('btn-csv').disabled = false;
+            document.getElementById('btn-json').disabled = false;
+        } catch (e) {
+            alert('Fetch failed: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Fetch Data';
+        }
+    });
+
+    // ── Export ────────────────────────────────────────────────────────────────
+    function downloadExport(format) {
+        if (lastTickers.length === 0) return;
+        const params = lastTickers.map(t => `tickers=${encodeURIComponent(t)}`).join('&');
+        window.location.href = `/history/export?${params}&minutes=${lastMinutes}&format=${format}`;
+    }
+
+    document.getElementById('btn-csv').addEventListener('click', () => downloadExport('csv'));
+    document.getElementById('btn-json').addEventListener('click', () => downloadExport('json'));
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadTrackedTickers();
+</script>
+</body>
+</html>
