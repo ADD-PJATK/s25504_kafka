@@ -3,279 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Stock Realtime Dashboard</title>
+    <title>Realtime Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
-        body { background: #0d1117; color: #c9d1d9; }
-        .sidebar { background: #161b22; border-right: 1px solid #30363d; min-height: 100vh; padding: 1rem; }
-        .main-panel { padding: 1.5rem; }
-        .card { background: #161b22; border: 1px solid #30363d; }
-        .card-header { background: #21262d; border-bottom: 1px solid #30363d; }
-        .table { color: #c9d1d9; }
-        .table-hover tbody tr:hover { background: #21262d; }
-        .badge-up { color: #3fb950; }
-        .badge-down { color: #f85149; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        .status-connected { background: #3fb950; }
-        .status-disconnected { background: #f85149; }
-        .ticker-item { cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-        .ticker-item:hover { background: #21262d; }
-        #search { background: #0d1117; color: #c9d1d9; border-color: #30363d; }
-        #search::placeholder { color: #8b949e; }
-        canvas { max-height: 360px; }
-        .form-check-input { background-color: #0d1117; border-color: #30363d; }
-        .form-check-input:checked { background-color: #1f6feb; border-color: #1f6feb; }
+        :root {
+            --bg-base:    #0d1117;
+            --bg-surface: #161b22;
+            --bg-raised:  #21262d;
+            --border:     #30363d;
+            --text-main:  #e6edf3;
+            --text-muted: #8b949e;
+
+            /* Distinguishable palette — works on dark backgrounds */
+            --c1: #58a6ff;  /* blue */
+            --c2: #3fb950;  /* green */
+            --c3: #f78166;  /* coral */
+            --c4: #d2a8ff;  /* purple */
+            --c5: #ffa657;  /* orange */
+            --c6: #79c0ff;  /* sky */
+            --c7: #56d364;  /* lime */
+            --c8: #ff7b72;  /* red */
+            --c9: #e3b341;  /* yellow */
+            --c10:#76e3ea;  /* cyan */
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0; height: 100vh; overflow: hidden;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; height: 100vh; }
+
+        .sidebar {
+            width: 280px; min-width: 280px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 1rem; gap: .75rem; }
+
+        /* ── Sidebar ── */
+        .sidebar-title {
+            font-size: 1rem; font-weight: 600; color: var(--text-main);
+            display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem;
+        }
+
+        .status-pill {
+            display: inline-flex; align-items: center; gap: .4rem;
+            font-size: .75rem; color: var(--text-muted);
+            margin-bottom: .75rem;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #f85149; }
+        .dot.on { background: #3fb950; }
+
+        #search {
+            background: var(--bg-base); color: var(--text-main);
+            border: 1px solid var(--border); border-radius: 6px;
+            padding: .35rem .6rem; font-size: .8rem; width: 100%;
+            margin-bottom: .5rem; outline: none;
+        }
+        #search:focus { border-color: #58a6ff; }
+
+        .ticker-scroll { flex: 1; overflow-y: auto; margin-bottom: .75rem; }
+        .ticker-scroll::-webkit-scrollbar { width: 4px; }
+        .ticker-scroll::-webkit-scrollbar-track { background: transparent; }
+        .ticker-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .ticker-row {
+            display: flex; align-items: center; gap: .5rem;
+            padding: .25rem .4rem; border-radius: 5px; cursor: pointer;
+            transition: background .1s;
+        }
+        .ticker-row:hover { background: var(--bg-raised); }
+        .ticker-row input[type=checkbox] {
+            accent-color: #58a6ff; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0;
+        }
+        .ticker-row label { cursor: pointer; font-size: .82rem; margin: 0; }
+        .ticker-sym { font-weight: 600; color: var(--text-main); }
+        .ticker-co  { font-size: .7rem; color: var(--text-muted); margin-left: .25rem; }
+
+        .btn-connect {
+            width: 100%; padding: .45rem; border-radius: 6px; border: none;
+            font-size: .85rem; font-weight: 600; cursor: pointer; margin-bottom: .4rem;
+            background: #238636; color: #fff; transition: background .15s;
+        }
+        .btn-connect:hover:not(:disabled) { background: #2ea043; }
+        .btn-connect:disabled { opacity: .5; cursor: not-allowed; }
+
+        .btn-disconnect {
+            width: 100%; padding: .45rem; border-radius: 6px;
+            border: 1px solid #f85149; background: transparent;
+            color: #f85149; font-size: .85rem; font-weight: 600;
+            cursor: pointer; transition: background .15s;
+        }
+        .btn-disconnect:hover:not(:disabled) { background: rgba(248,81,73,.15); }
+        .btn-disconnect:disabled { opacity: .4; cursor: not-allowed; }
+
+        .last-update { font-size: .72rem; color: var(--text-muted); margin-top: .5rem; }
+
+        /* ── Chart card ── */
+        .card {
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden;
+        }
+        .card-head {
+            background: var(--bg-raised); border-bottom: 1px solid var(--border);
+            padding: .5rem .85rem; font-size: .82rem; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-body { padding: .75rem; }
+
+        .chart-wrap { height: 300px; position: relative; }
+        .chart-wrap canvas { height: 100% !important; }
+
+        .btn-sm-outline {
+            font-size: .72rem; padding: .2rem .55rem; border-radius: 5px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text-muted); cursor: pointer;
+        }
+        .btn-sm-outline:hover { border-color: var(--text-muted); color: var(--text-main); }
+
+        /* ── Table ── */
+        .table-wrap { flex: 1; overflow-y: auto; }
+        .table-wrap::-webkit-scrollbar { width: 4px; }
+        .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+        thead th {
+            position: sticky; top: 0;
+            background: var(--bg-raised); color: var(--text-muted);
+            padding: .5rem .75rem; text-align: left; font-weight: 600;
+            border-bottom: 1px solid var(--border); white-space: nowrap;
+        }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--bg-raised); }
+        tbody td { padding: .45rem .75rem; color: var(--text-main); }
+
+        .price-up   { color: #3fb950; }
+        .price-down { color: #f85149; }
+        .price-flat { color: var(--text-muted); }
+
+        .empty-row td { text-align: center; color: var(--text-muted); padding: 2rem; }
     </style>
 </head>
 <body>
-<div class="container-fluid p-0">
-    <div class="row g-0">
+<div class="layout">
 
-        <!-- Sidebar -->
-        <div class="col-md-3 sidebar">
-            <h5 class="mb-3 text-white">
-                <svg width="20" height="20" fill="currentColor" class="me-2 text-success" viewBox="0 0 16 16">
-                    <path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5z"/>
-                </svg>
-                Realtime Dashboard
-            </h5>
+    <!-- ── Sidebar ────────────────────────────────────────────────────── -->
+    <div class="sidebar">
+        <div class="sidebar-title">
+            <svg width="18" height="18" fill="#3fb950" viewBox="0 0 16 16">
+                <path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+            Realtime Dashboard
+        </div>
 
-            <div class="mb-3">
-                <span class="status-dot status-disconnected" id="status-dot"></span>
-                <small id="status-text" class="text-muted">Disconnected</small>
+        <div class="status-pill">
+            <span class="dot" id="dot"></span>
+            <span id="status-text">Disconnected</span>
+        </div>
+
+        <input type="text" id="search" placeholder="Search tickers…">
+
+        <div class="ticker-scroll" id="ticker-list">
+            <div style="color:var(--text-muted);font-size:.8rem;padding:.5rem">Loading tickers…</div>
+        </div>
+
+        <button class="btn-connect"    id="btn-connect">Connect</button>
+        <button class="btn-disconnect" id="btn-disconnect" disabled>Disconnect</button>
+
+        <div class="last-update">Last tick: <span id="last-update">—</span></div>
+    </div>
+
+    <!-- ── Main ───────────────────────────────────────────────────────── -->
+    <div class="main">
+
+        <!-- Chart -->
+        <div class="card">
+            <div class="card-head">
+                Price Chart <small style="color:var(--text-muted);font-weight:400">&nbsp;— last 30 ticks per ticker</small>
+                <button class="btn-sm-outline" id="btn-clear">Clear</button>
             </div>
-
-            <input type="text" id="search" class="form-control form-control-sm mb-2" placeholder="Search tickers...">
-
-            <div style="max-height: 55vh; overflow-y: auto;" id="ticker-list">
-                <div class="text-muted small">Loading tickers…</div>
-            </div>
-
-            <div class="d-grid gap-2 mt-3">
-                <button id="btn-connect" class="btn btn-success btn-sm">Connect</button>
-                <button id="btn-disconnect" class="btn btn-outline-danger btn-sm" disabled>Disconnect</button>
-            </div>
-
-            <div class="mt-3">
-                <small class="text-muted">Last update: <span id="last-update">—</span></small>
+            <div class="card-body">
+                <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
             </div>
         </div>
 
-        <!-- Main panel -->
-        <div class="col-md-9 main-panel">
-
-            <div class="row mb-3">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span>Price Chart <small class="text-muted">(last 30 ticks per ticker)</small></span>
-                            <button class="btn btn-outline-secondary btn-sm" id="btn-clear-chart">Clear</button>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="priceChart"></canvas>
-                        </div>
-                    </div>
-                </div>
+        <!-- Table -->
+        <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="card-head">Live Prices</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Price (PLN)</th>
+                            <th>Change</th>
+                            <th>Volume</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <tr class="empty-row"><td colspan="5">Select tickers and click Connect</td></tr>
+                    </tbody>
+                </table>
             </div>
-
-            <div class="card">
-                <div class="card-header">Live Prices</div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Ticker</th>
-                                <th>Price (PLN)</th>
-                                <th>Change</th>
-                                <th>Volume</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="price-table-body">
-                            <tr><td colspan="5" class="text-center text-muted py-4">Select tickers and click Connect</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
+
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
-    // ── State ─────────────────────────────────────────────────────────────────
-    let eventSource = null;
-    const MAX_HISTORY = 30;
-    // ticker -> { price, prevPrice, volume, ts, history: [{x, y}] }
-    const tickerData = {};
-    const CHART_COLORS = [
-        '#58a6ff','#3fb950','#f78166','#d2a8ff','#ffa657',
-        '#79c0ff','#56d364','#ff7b72','#bc8cff','#ffc680'
-    ];
-    let colorIdx = 0;
-    const tickerColors = {};
+// ── Colour palette ─────────────────────────────────────────────────────────
+const PALETTE = [
+    '#58a6ff','#3fb950','#f78166','#d2a8ff','#ffa657',
+    '#79c0ff','#56d364','#ff7b72','#e3b341','#76e3ea'
+];
+const tickerColor = {};
+let colorIdx = 0;
+function colorFor(sym) {
+    if (!tickerColor[sym]) tickerColor[sym] = PALETTE[colorIdx++ % PALETTE.length];
+    return tickerColor[sym];
+}
 
-    // ── Chart ─────────────────────────────────────────────────────────────────
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: { datasets: [] },
-        options: {
-            animation: false,
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { labels: { color: '#c9d1d9' } } },
-            scales: {
-                x: {
-                    type: 'category',
-                    ticks: { color: '#8b949e', maxTicksLimit: 8, maxRotation: 0 },
-                    grid: { color: '#21262d' }
-                },
-                y: {
-                    ticks: { color: '#8b949e' },
-                    grid: { color: '#21262d' }
-                }
-            }
+// ── Chart ──────────────────────────────────────────────────────────────────
+const chart = new Chart(document.getElementById('priceChart').getContext('2d'), {
+    type: 'line',
+    data: { datasets: [] },
+    options: {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { labels: { color: '#8b949e', boxWidth: 12, font: { size: 11 } } }
+        },
+        scales: {
+            x: { type: 'category', ticks: { color: '#8b949e', maxTicksLimit: 8, maxRotation: 0 }, grid: { color: '#21262d' } },
+            y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
         }
-    });
-
-    function getColor(ticker) {
-        if (!tickerColors[ticker]) {
-            tickerColors[ticker] = CHART_COLORS[colorIdx++ % CHART_COLORS.length];
-        }
-        return tickerColors[ticker];
     }
+});
 
-    function updateChart(ticker, ts, price) {
-        const label = ts.substring(11, 19); // HH:MM:SS
-        let dataset = chart.data.datasets.find(d => d.label === ticker);
-        if (!dataset) {
-            dataset = {
-                label: ticker,
-                data: [],
-                borderColor: getColor(ticker),
-                backgroundColor: 'transparent',
-                tension: 0.3,
-                pointRadius: 2
-            };
-            chart.data.datasets.push(dataset);
-        }
-        dataset.data.push({ x: label, y: price });
-        if (dataset.data.length > MAX_HISTORY) dataset.data.shift();
-        chart.update('none');
+function pushToChart(sym, ts, price) {
+    const label = ts.substring(11, 19);
+    let ds = chart.data.datasets.find(d => d.label === sym);
+    if (!ds) {
+        ds = {
+            label: sym, data: [],
+            borderColor: colorFor(sym), backgroundColor: 'transparent',
+            tension: 0.3, pointRadius: 2, borderWidth: 1.5
+        };
+        chart.data.datasets.push(ds);
     }
+    ds.data.push({ x: label, y: parseFloat(price) });
+    if (ds.data.length > 30) ds.data.shift();
+    chart.update('none');
+}
 
-    // ── Table ─────────────────────────────────────────────────────────────────
-    function updateTable(tick) {
-        const prev = tickerData[tick.ticker];
-        const change = prev ? (tick.price - prev.price).toFixed(2) : null;
-        tickerData[tick.ticker] = tick;
+document.getElementById('btn-clear').onclick = () => {
+    chart.data.datasets = [];
+    chart.update();
+};
 
-        const tbody = document.getElementById('price-table-body');
-        let row = document.getElementById('row-' + tick.ticker);
-        if (!row) {
-            row = document.createElement('tr');
-            row.id = 'row-' + tick.ticker;
-            tbody.appendChild(row);
-        }
+// ── Table ──────────────────────────────────────────────────────────────────
+const prevPrice = {};
 
-        const changeHtml = change === null ? '—'
-            : parseFloat(change) > 0
-                ? `<span class="badge-up">▲ ${change}</span>`
-                : parseFloat(change) < 0
-                    ? `<span class="badge-down">▼ ${change}</span>`
-                    : `<span class="text-muted">— ${change}</span>`;
+function upsertRow(tick) {
+    const sym = tick.ticker;
+    const price = parseFloat(tick.price);
+    const prev  = prevPrice[sym];
+    prevPrice[sym] = price;
 
-        row.innerHTML = `
-            <td><strong style="color:${getColor(tick.ticker)}">${tick.ticker}</strong></td>
-            <td>${parseFloat(tick.price).toFixed(2)}</td>
-            <td>${changeHtml}</td>
-            <td>${tick.volume ?? '—'}</td>
-            <td><small class="text-muted">${tick.ts ? tick.ts.substring(11,19) : '—'}</small></td>
-        `;
+    const diff = prev !== undefined ? price - prev : null;
+    let changeHtml;
+    if (diff === null)         changeHtml = '<span class="price-flat">—</span>';
+    else if (diff > 0.0001)   changeHtml = `<span class="price-up">▲ ${diff.toFixed(2)}</span>`;
+    else if (diff < -0.0001)  changeHtml = `<span class="price-down">▼ ${Math.abs(diff).toFixed(2)}</span>`;
+    else                       changeHtml = `<span class="price-flat">— 0.00</span>`;
+
+    const tbody = document.getElementById('tbody');
+    // Remove placeholder row
+    const emp = tbody.querySelector('.empty-row');
+    if (emp) emp.remove();
+
+    let row = document.getElementById('row-' + sym);
+    if (!row) {
+        row = document.createElement('tr');
+        row.id = 'row-' + sym;
+        tbody.appendChild(row);
     }
+    row.innerHTML = `
+        <td><strong style="color:${colorFor(sym)}">${sym}</strong></td>
+        <td>${price.toFixed(2)}</td>
+        <td>${changeHtml}</td>
+        <td>${tick.volume ?? '—'}</td>
+        <td style="color:var(--text-muted);font-size:.77rem">${tick.ts ? tick.ts.substring(11,19) : '—'}</td>
+    `;
+}
 
-    // ── Ticker list ───────────────────────────────────────────────────────────
-    let allTickers = [];
+// ── Ticker list ────────────────────────────────────────────────────────────
+let allTickerObjs = [];   // [{sym, company}]
 
-    async function loadTickers() {
+async function loadTickers() {
+    try {
+        const json = await fetch('/dashboard/tickers').then(r => r.json());
+        const raw  = json.tickers || json || [];
+
+        // API may return strings OR objects {ticker, company}
+        allTickerObjs = raw.map(t =>
+            typeof t === 'string'
+                ? { sym: t, company: '' }
+                : { sym: t.ticker || t.symbol || String(t), company: t.company || t.name || '' }
+        );
+        renderList(allTickerObjs);
+    } catch (e) {
+        document.getElementById('ticker-list').innerHTML =
+            '<div style="color:#f85149;font-size:.8rem">Failed to load tickers</div>';
+    }
+}
+
+function renderList(items) {
+    document.getElementById('ticker-list').innerHTML = items.map(({ sym, company }) => `
+        <div class="ticker-row" onclick="toggle('${sym}')">
+            <input class="ticker-cb" type="checkbox" id="cb-${sym}" value="${sym}"
+                   onclick="event.stopPropagation()">
+            <label for="cb-${sym}">
+                <span class="ticker-sym">${sym}</span>
+                ${company ? `<span class="ticker-co">${company}</span>` : ''}
+            </label>
+        </div>
+    `).join('');
+}
+
+function toggle(sym) {
+    const cb = document.getElementById('cb-' + sym);
+    if (cb) cb.checked = !cb.checked;
+}
+
+document.getElementById('search').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    renderList(allTickerObjs.filter(({ sym, company }) =>
+        sym.toLowerCase().includes(q) || company.toLowerCase().includes(q)));
+});
+
+function getSelected() {
+    return [...document.querySelectorAll('.ticker-cb:checked')].map(cb => cb.value);
+}
+
+// ── SSE ────────────────────────────────────────────────────────────────────
+let es = null;
+
+function setConnected(on) {
+    document.getElementById('dot').className = 'dot' + (on ? ' on' : '');
+    document.getElementById('status-text').textContent = on ? 'Connected' : 'Disconnected';
+    document.getElementById('btn-connect').disabled    = on;
+    document.getElementById('btn-disconnect').disabled = !on;
+}
+
+document.getElementById('btn-connect').onclick = () => {
+    const tickers = getSelected();
+    if (!tickers.length) { alert('Select at least one ticker.'); return; }
+    if (es) es.close();
+
+    const qs = tickers.map(t => 'tickers=' + encodeURIComponent(t)).join('&');
+    es = new EventSource('/dashboard/stream?' + qs);
+    es.addEventListener('tick', ev => {
         try {
-            const res = await fetch('/dashboard/tickers');
-            const json = await res.json();
-            allTickers = json.tickers || [];
-            renderTickerList(allTickers);
-        } catch (e) {
-            document.getElementById('ticker-list').innerHTML =
-                '<div class="text-danger small">Failed to load tickers</div>';
-        }
-    }
-
-    function renderTickerList(tickers) {
-        const list = document.getElementById('ticker-list');
-        list.innerHTML = tickers.map(t => `
-            <div class="ticker-item form-check">
-                <input class="form-check-input ticker-cb" type="checkbox" value="${t}" id="cb-${t}">
-                <label class="form-check-label small" for="cb-${t}">${t}</label>
-            </div>
-        `).join('');
-    }
-
-    document.getElementById('search').addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        renderTickerList(allTickers.filter(t => t.toLowerCase().includes(q)));
+            const tick = JSON.parse(ev.data);
+            upsertRow(tick);
+            pushToChart(tick.ticker, tick.ts, tick.price);
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        } catch (_) {}
     });
+    es.onopen  = () => setConnected(true);
+    es.onerror = () => setConnected(false);
+};
 
-    function selectedTickers() {
-        return [...document.querySelectorAll('.ticker-cb:checked')].map(cb => cb.value);
-    }
+document.getElementById('btn-disconnect').onclick = () => {
+    if (es) { es.close(); es = null; }
+    setConnected(false);
+};
 
-    // ── SSE Connection ────────────────────────────────────────────────────────
-    function setStatus(connected) {
-        const dot = document.getElementById('status-dot');
-        const txt = document.getElementById('status-text');
-        dot.className = 'status-dot ' + (connected ? 'status-connected' : 'status-disconnected');
-        txt.textContent = connected ? 'Connected' : 'Disconnected';
-        document.getElementById('btn-connect').disabled = connected;
-        document.getElementById('btn-disconnect').disabled = !connected;
-    }
-
-    document.getElementById('btn-connect').addEventListener('click', () => {
-        const tickers = selectedTickers();
-        if (tickers.length === 0) {
-            alert('Please select at least one ticker.');
-            return;
-        }
-        if (eventSource) eventSource.close();
-
-        const params = tickers.map(t => `tickers=${encodeURIComponent(t)}`).join('&');
-        eventSource = new EventSource(`/dashboard/stream?${params}`);
-
-        eventSource.addEventListener('tick', e => {
-            try {
-                const tick = JSON.parse(e.data);
-                updateTable(tick);
-                updateChart(tick.ticker, tick.ts, tick.price);
-                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
-            } catch (_) {}
-        });
-
-        eventSource.onopen = () => setStatus(true);
-        eventSource.onerror = () => setStatus(false);
-    });
-
-    document.getElementById('btn-disconnect').addEventListener('click', () => {
-        if (eventSource) { eventSource.close(); eventSource = null; }
-        setStatus(false);
-    });
-
-    document.getElementById('btn-clear-chart').addEventListener('click', () => {
-        chart.data.datasets = [];
-        chart.update();
-    });
-
-    // ── Init ──────────────────────────────────────────────────────────────────
-    loadTickers();
+// ── Init ───────────────────────────────────────────────────────────────────
+loadTickers();
 </script>
 </body>
 </html>
