@@ -123,6 +123,18 @@
             font-size: .68rem; padding: .1rem .4rem; border-radius: 99px;
             border: 1px solid; font-weight: 600;
         }
+
+        /* Time range segmented control */
+        .range-group { display: flex; gap: 2px; }
+        .range-btn {
+            font-size: .72rem; padding: .18rem .55rem; border-radius: 4px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text-muted); cursor: pointer; transition: all .12s;
+        }
+        .range-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
+        .range-btn.active {
+            background: #1f6feb; border-color: #58a6ff; color: #fff; font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -159,12 +171,19 @@
         <!-- Chart card -->
         <div class="card">
             <div class="card-head">
-                <div>
+                <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
                     <strong>Price Chart</strong>
-                    <span style="font-weight:400"> — last 30 ticks · </span>
                     <span class="active-chips" id="active-chips" style="display:inline-flex"></span>
                 </div>
-                <button class="btn-xs" id="btn-clear">Clear</button>
+                <div style="display:flex;align-items:center;gap:.5rem">
+                    <div class="range-group" id="range-group">
+                        <button class="range-btn" data-minutes="1">1m</button>
+                        <button class="range-btn" data-minutes="5">5m</button>
+                        <button class="range-btn" data-minutes="10">10m</button>
+                        <button class="range-btn active" data-minutes="0">All</button>
+                    </div>
+                    <button class="btn-xs" id="btn-clear">Clear</button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
@@ -208,6 +227,33 @@ function colorFor(sym) {
     return tickerColor[sym];
 }
 
+// ── Time range ────────────────────────────────────────────────────────────
+// 0 = All (no min bound). Positive = minutes to show.
+let rangeMinutes = 0;
+// Keep up to 15 minutes of raw data per ticker so switching range is instant
+const MAX_BUFFER_MS = 15 * 60 * 1000;
+
+document.getElementById('range-group').addEventListener('click', e => {
+    const btn = e.target.closest('.range-btn');
+    if (!btn) return;
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    rangeMinutes = parseInt(btn.dataset.minutes);
+    applyRange();
+});
+
+function applyRange() {
+    if (rangeMinutes === 0) {
+        chart.options.scales.x.min = undefined;
+        chart.options.scales.x.max = undefined;
+    } else {
+        const now = Date.now();
+        chart.options.scales.x.min = new Date(now - rangeMinutes * 60_000);
+        chart.options.scales.x.max = new Date(now);
+    }
+    chart.update('none');
+}
+
 // ── Chart (time axis — always chronological) ──────────────────────────────
 const chart = new Chart(document.getElementById('priceChart').getContext('2d'), {
     type: 'line',
@@ -245,9 +291,14 @@ function pushToChart(sym, ts, price) {
         };
         chart.data.datasets.push(ds);
     }
-    ds.data.push({ x: new Date(ts), y: parseFloat(price) });
-    if (ds.data.length > 30) ds.data.shift();
-    chart.update('none');
+    const point = { x: new Date(ts), y: parseFloat(price) };
+    ds.data.push(point);
+    // Trim buffer to MAX_BUFFER_MS so memory stays bounded
+    const cutoff = Date.now() - MAX_BUFFER_MS;
+    while (ds.data.length > 1 && ds.data[0].x.getTime() < cutoff) ds.data.shift();
+
+    // Keep x-axis window in sync when a range is active
+    applyRange();
 }
 
 function clearChart() {
