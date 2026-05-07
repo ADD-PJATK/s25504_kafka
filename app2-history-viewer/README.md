@@ -19,21 +19,25 @@ cd app2-history-viewer
 
 ## Configuration
 
-The API key is read from the `ADD_API_KEY` environment variable — it is **never** hardcoded.
+The API key is read from the `ADD_API_KEY` variable — it is **never** hardcoded.
+
+Create a `.env` file at the **project root** (one level up from this folder):
 
 ```bash
+# from the project root
 cp .env.example .env
 # Edit .env and set your key:
 #   ADD_API_KEY=<your-key-from-add.piotrkojalowicz.dev>
-export $(cat .env | xargs)
 ```
+
+No `export` or sourcing is needed. Spring Boot loads the file automatically via `spring.config.import`.
 
 ### Changing tracked tickers
 
 By default the app polls a set of 16 tickers defined in `application.properties`:
 
 ```properties
-history.tracked-tickers=ACME,ALFA,BETA,CASH,CLOUD,DATA,DEVS,ECO,HEAL,NET,NOVA,FUEL,GAME,INSR,JET,...
+history.tracked-tickers=ACME,ALFA,BETA,CASH,CLOUD,DATA,DEVS,ECO,HEAL,NET,NOVA,FUEL,GAME,GRIN,INSR,JET
 ```
 
 Override at runtime:

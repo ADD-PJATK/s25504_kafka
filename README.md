@@ -16,16 +16,17 @@ Two Spring Boot 3 microservices that consume a live stock-price SSE feed from `a
 ## Quick Start
 
 ```bash
-# App 1
+# 1. Create the API key file at the project root (one-time setup)
+cp .env.example .env
+# Edit .env and replace "your_api_key_here" with your real key.
+# No `export` or sourcing is required — Spring Boot reads it automatically.
+
+# 2. Start App 1 (terminal 1)
 cd app1-realtime-dashboard
-cp .env.example .env          # add your API key
-export $(cat .env | xargs)
 mvn spring-boot:run
 
-# App 2 (separate terminal)
+# 3. Start App 2 (terminal 2)
 cd app2-history-viewer
-cp .env.example .env
-export $(cat .env | xargs)
 mvn spring-boot:run
 ```
 

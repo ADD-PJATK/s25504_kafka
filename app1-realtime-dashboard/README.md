@@ -19,14 +19,18 @@ cd app1-realtime-dashboard
 
 ## Configuration
 
-The API key is read from the `ADD_API_KEY` environment variable — it is **never** hardcoded.
+The API key is read from the `ADD_API_KEY` variable — it is **never** hardcoded.
+
+Create a `.env` file at the **project root** (one level up from this folder):
 
 ```bash
+# from the project root
 cp .env.example .env
 # Edit .env and set your key:
 #   ADD_API_KEY=<your-key-from-add.piotrkojalowicz.dev>
-export $(cat .env | xargs)
 ```
+
+No `export` or sourcing is needed. Spring Boot loads the file automatically via `spring.config.import`.
 
 ## How to Run
 
@@ -58,7 +62,7 @@ docker run -p 8080:8080 -e ADD_API_KEY=<your-key> s25504-dashboard
 2. The user selects one or more tickers and clicks **Connect**.
 3. The browser opens an `EventSource` to `/dashboard/stream?tickers=ACME&tickers=ALFA`.
 4. The Spring Boot backend opens one reactive `WebClient` SSE subscription per ticker and merges all streams into a single `text/event-stream` response.
-5. Each `tick` event updates the live price table and the Chart.js line chart (last 30 ticks per ticker).
+5. Each `tick` event updates the live price table and the Chart.js line chart. The chart keeps a 15-minute rolling buffer in memory; the **1m / 5m / 10m / All** time-range buttons filter the visible window without discarding data.
 6. If the connection drops, `EventSource` reconnects automatically; the backend retries upstream with `retry(5)`.
 
 ## Running Tests
