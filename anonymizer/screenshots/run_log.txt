@@ -1,0 +1,4 @@
+Successfully anonymized 'examples/note.md' and saved to 'examples/note.anon.md'.
+Successfully anonymized 'examples/data.csv' and saved to 'examples/data.anon.csv'.
+Successfully anonymized 'examples/config.json' and saved to 'examples/config.anon.json'.
+Successfully anonymized 'examples/log.txt' and saved to 'examples/log.anon.txt'.

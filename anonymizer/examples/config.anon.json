@@ -1,0 +1,9 @@
+{
+  "adminUser": {
+    "fullName": "PERSON_A",
+    "emailAddress": "EMAIL_A"
+  },
+  "settings": {
+    "theme": "dark"
+  }
+}
