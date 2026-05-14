@@ -1,0 +1,62 @@
+Here is the prompt used:
+
+Role & Context:
+You are an expert Python developer. Your task is to write a local, self-contained CLI application that anonymizes sensitive data in text files based on a JSON mapping file.
+
+CRITICAL CONSTRAINT: The solution must be 100% local. Do NOT use any external APIs, HTTP clients, LLM SDKs, or cloud services. Do not use external dependencies if standard libraries (like json, re, argparse, pathlib) can do the job.
+
+Functional Requirements:
+
+CLI Interface: Create a script named anonymize.py using argparse. It must accept:
+
+--mapping: Path to the JSON mapping file.
+
+--input: Path to the source file to anonymize.
+
+--output: Path to save the anonymized file.
+
+File Handling: >     * Read the input file and write the output file exclusively in UTF-8 encoding.
+
+If the input file is not valid UTF-8, exit gracefully with a clear error message.
+
+Treat all input files (.json, .txt, .md, .csv) as plain text. Do not parse JSON or CSV into data structures for the replacement process; just perform text-based substitution on the raw string data.
+
+Mapping Schema Validation: Load the mapping JSON and validate it. It will look like this:
+
+JSON
+{
+  "replacements": [
+    { "find": ["string1", "string2"], "replace": "TOKEN_1" }
+  ],
+  "options": { "case_sensitive": false }
+}
+Throw a clear error and exit if: replacements is missing, any find array is empty, any string inside find is empty, or replace is missing.
+
+Replacement Logic (Overlap Policy): >     * Process the replacements array strictly in the order provided.
+
+Within each rule, process the find strings strictly in array order.
+
+Use a sequential find-and-replace approach (scanning left-to-right). Apply the replacement to the entire document state as it exists at that step.
+
+If options.case_sensitive is false (or missing), perform case-insensitive matching. Hint: If using re.sub, ensure you use re.escape() on the find strings to prevent regex injection, and use re.IGNORECASE.
+
+Output & Safety: >     * Write the final transformed text to the --output path.
+
+Create the parent directories for the output path if they do not exist.
+
+Deliverables Request:
+Please output the following:
+
+The complete, single-file Python code for anonymize.py.
+
+A complete README.md file formatted to meet academic assignment standards. The README must include:
+
+Prerequisites (Python version).
+
+Installation/Setup (mentioning no external dependencies are needed).
+
+Exact command-line usage examples.
+
+An explanation of the mapping file format.
+
+A clear explanation of the "Overlap Policy" (sequential processing as defined above).
