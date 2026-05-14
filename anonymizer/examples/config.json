@@ -1,0 +1,9 @@
+{
+  "adminUser": {
+    "fullName": "Anna Nowak",
+    "emailAddress": "anna@firma.test"
+  },
+  "settings": {
+    "theme": "dark"
+  }
+}

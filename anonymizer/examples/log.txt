@@ -1,0 +1,3 @@
+2023-10-01 10:00:00 INFO User Anna Nowak logged in.
+2023-10-01 10:05:00 WARN Failed to send email to anna@firma.test.
+2023-10-01 10:10:00 DEBUG SMS sent to +48 123 456 789.
