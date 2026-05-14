@@ -1,9 +1,66 @@
 {
-  "adminUser": {
-    "fullName": "PERSON_A",
-    "emailAddress": "EMAIL_A"
+  "application": {
+    "name": "DataPipeline",
+    "version": "2.4.1",
+    "environment": "production"
+  },
+  "adminUsers": [
+    {
+      "id": 1,
+      "fullName": "PERSON_A",
+      "emailAddress": "EMAIL_A",
+      "phone": "PHONE_A",
+      "role": "superadmin",
+      "active": true
+    },
+    {
+      "id": 2,
+      "fullName": "Piotr Wiśniewski",
+      "emailAddress": "piotr.wisniewski@firma.test",
+      "phone": "+48 859 381 350",
+      "role": "admin",
+      "active": true
+    },
+    {
+      "id": 3,
+      "fullName": "Katarzyna Kowalska",
+      "emailAddress": "katarzyna.kowalska@firma.test",
+      "phone": "+48 767 653 956",
+      "role": "admin",
+      "active": false
+    }
+  ],
+  "notifications": {
+    "alertRecipients": [
+      "EMAIL_A",
+      "piotr.wisniewski@firma.test"
+    ],
+    "escalationContact": {
+      "name": "PERSON_A",
+      "phone": "PHONE_A",
+      "email": "EMAIL_A"
+    }
+  },
+  "database": {
+    "host": "db.internal.firma.test",
+    "port": 5432,
+    "name": "datapipeline_prod",
+    "poolSize": 20
+  },
+  "kafka": {
+    "bootstrapServers": "kafka-01.firma.test:9092,kafka-02.firma.test:9092",
+    "groupId": "datapipeline-consumer",
+    "topics": ["events.raw", "events.processed", "events.dlq"]
+  },
+  "audit": {
+    "enabled": true,
+    "retentionDays": 90,
+    "lastReviewedBy": "PERSON_A",
+    "lastReviewedAt": "2024-03-15T10:30:00Z"
   },
   "settings": {
-    "theme": "dark"
+    "theme": "dark",
+    "locale": "pl-PL",
+    "timezone": "Europe/Warsaw"
   }
 }

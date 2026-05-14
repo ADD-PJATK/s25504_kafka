@@ -1,9 +1,66 @@
 {
-  "adminUser": {
-    "fullName": "Anna Nowak",
-    "emailAddress": "anna@firma.test"
+  "application": {
+    "name": "DataPipeline",
+    "version": "2.4.1",
+    "environment": "production"
+  },
+  "adminUsers": [
+    {
+      "id": 1,
+      "fullName": "Anna Nowak",
+      "emailAddress": "anna@firma.test",
+      "phone": "+48 123 456 789",
+      "role": "superadmin",
+      "active": true
+    },
+    {
+      "id": 2,
+      "fullName": "Piotr Wiśniewski",
+      "emailAddress": "piotr.wisniewski@firma.test",
+      "phone": "+48 859 381 350",
+      "role": "admin",
+      "active": true
+    },
+    {
+      "id": 3,
+      "fullName": "Katarzyna Kowalska",
+      "emailAddress": "katarzyna.kowalska@firma.test",
+      "phone": "+48 767 653 956",
+      "role": "admin",
+      "active": false
+    }
+  ],
+  "notifications": {
+    "alertRecipients": [
+      "anna@firma.test",
+      "piotr.wisniewski@firma.test"
+    ],
+    "escalationContact": {
+      "name": "A. Nowak",
+      "phone": "123456789",
+      "email": "anna@firma.test"
+    }
+  },
+  "database": {
+    "host": "db.internal.firma.test",
+    "port": 5432,
+    "name": "datapipeline_prod",
+    "poolSize": 20
+  },
+  "kafka": {
+    "bootstrapServers": "kafka-01.firma.test:9092,kafka-02.firma.test:9092",
+    "groupId": "datapipeline-consumer",
+    "topics": ["events.raw", "events.processed", "events.dlq"]
+  },
+  "audit": {
+    "enabled": true,
+    "retentionDays": 90,
+    "lastReviewedBy": "Anna Nowak",
+    "lastReviewedAt": "2024-03-15T10:30:00Z"
   },
   "settings": {
-    "theme": "dark"
+    "theme": "dark",
+    "locale": "pl-PL",
+    "timezone": "Europe/Warsaw"
   }
 }

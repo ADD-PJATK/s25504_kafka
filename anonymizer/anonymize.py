@@ -76,9 +76,12 @@ def main():
     for rule in mapping["replacements"]:
         replace_val = rule["replace"]
         for find_str in rule["find"]:
-            # Escape the find_str to prevent regex injection, performing strict text substitution
+            # re.escape makes find_str a literal-text pattern.
+            # The lambda replacement bypasses re.sub's backslash interpretation of
+            # the replace string, so tokens like PERSON_01 or \SAFE are always
+            # inserted verbatim regardless of their content.
             escaped_find = re.escape(find_str)
-            text = re.sub(escaped_find, replace_val, text, flags=flags)
+            text = re.sub(escaped_find, lambda _: replace_val, text, flags=flags)
             
     # 4. Write output file
     try:

@@ -1,3 +1,200 @@
-2023-10-01 10:00:00 INFO User Anna Nowak logged in.
-2023-10-01 10:05:00 WARN Failed to send email to anna@firma.test.
-2023-10-01 10:10:00 DEBUG SMS sent to +48 123 456 789.
+2024-03-01 00:00:00 DEBUG User Marek Lewandowski accessed dashboard.
+2024-03-02 01:03:07 INFO User Katarzyna Kowalska modified settings.
+2024-03-03 02:06:14 INFO User Magdalena Kowalczyk deleted record.
+2024-03-04 03:09:21 INFO User Joanna Jankowska changed password.
+2024-03-05 04:12:28 INFO User Katarzyna Kowalska accessed dashboard.
+2024-03-06 05:15:35 ERROR User Katarzyna Kowalska changed password.
+2024-03-07 06:18:42 INFO User Joanna Jankowska accessed dashboard.
+2024-03-08 07:21:49 INFO User Paweł Mazur logged out.
+2024-03-09 08:24:56 WARN User Grzegorz Krawczyk deleted record.
+2024-03-10 09:27:03 INFO User Paweł Mazur deleted record.
+2024-03-11 10:30:10 ERROR User Anna Nowak (anna@firma.test) changed password.
+2024-03-12 11:33:17 INFO User Joanna Jankowska updated profile.
+2024-03-13 12:36:24 DEBUG User Barbara Szymańska updated profile.
+2024-03-14 13:39:31 INFO User Paweł Mazur downloaded report.
+2024-03-15 14:42:38 WARN User Katarzyna Kowalska deleted record.
+2024-03-16 15:45:45 WARN User Magdalena Kowalczyk logged out.
+2024-03-17 16:48:52 INFO User Paweł Mazur logged in.
+2024-03-18 17:51:59 WARN User Jacek Kozłowski modified settings.
+2024-03-19 18:54:06 ERROR User Magdalena Kowalczyk requested data export.
+2024-03-20 19:57:13 ERROR User Magdalena Kowalczyk downloaded report.
+2024-03-21 20:00:20 WARN User Marek Lewandowski changed password.
+2024-03-22 21:03:27 INFO User Paweł Mazur downloaded report.
+2024-03-23 22:06:34 ERROR User Magdalena Kowalczyk requested data export.
+2024-03-24 23:09:41 DEBUG User Paweł Mazur logged out.
+2024-03-25 00:12:48 INFO User Joanna Jankowska accessed dashboard.
+2024-03-26 01:15:55 WARN User Magdalena Kowalczyk updated profile.
+2024-03-27 02:18:02 ERROR User Barbara Szymańska logged in.
+2024-03-28 03:21:09 INFO User Joanna Jankowska deleted record.
+2024-03-01 04:24:16 DEBUG User Magdalena Kowalczyk uploaded document.
+2024-03-02 05:27:23 ERROR User Paweł Mazur requested data export.
+2024-03-03 06:30:30 INFO User Katarzyna Kowalska downloaded report.
+2024-03-04 07:33:37 ERROR User Dorota Michalska logged out.
+2024-03-05 08:36:44 INFO User Dorota Michalska downloaded report.
+2024-03-06 09:39:51 ERROR User Tomasz Kamiński accessed dashboard.
+2024-03-07 10:42:58 DEBUG User Piotr Wiśniewski requested data export.
+2024-03-08 11:45:05 DEBUG User Marek Lewandowski deleted record.
+2024-03-09 12:48:12 INFO User Jacek Kozłowski logged in.
+2024-03-10 13:51:19 WARN User Tomasz Kamiński updated profile.
+2024-03-11 14:54:26 WARN User Barbara Szymańska accessed dashboard.
+2024-03-12 15:57:33 ERROR User Katarzyna Kowalska updated profile.
+2024-03-13 16:00:40 ERROR User Barbara Szymańska modified settings.
+2024-03-14 17:03:47 DEBUG User Marek Lewandowski accessed dashboard.
+2024-03-15 18:06:54 DEBUG User Dorota Michalska accessed dashboard.
+2024-03-16 19:09:01 DEBUG User Grzegorz Krawczyk accessed dashboard.
+2024-03-17 20:12:08 WARN User Marek Lewandowski logged out.
+2024-03-18 21:15:15 WARN User Marek Lewandowski changed password.
+2024-03-19 22:18:22 WARN User Piotr Wiśniewski requested data export.
+2024-03-20 23:21:29 WARN User Tomasz Kamiński downloaded report.
+2024-03-21 00:24:36 INFO User Marek Lewandowski accessed dashboard.
+2024-03-22 01:27:43 DEBUG User Paweł Mazur deleted record.
+2024-03-23 02:30:50 DEBUG User Marek Lewandowski modified settings.
+2024-03-24 03:33:57 INFO User Jacek Kozłowski modified settings.
+2024-03-25 04:36:04 ERROR User Barbara Szymańska accessed dashboard.
+2024-03-26 05:39:11 ERROR User Katarzyna Kowalska requested data export.
+2024-03-27 06:42:18 ERROR User Piotr Wiśniewski changed password.
+2024-03-28 07:45:25 INFO User Anna Nowak (anna@firma.test) requested data export.
+2024-03-01 08:48:32 WARN User Katarzyna Kowalska uploaded document.
+2024-03-02 09:51:39 INFO User Katarzyna Kowalska logged in.
+2024-03-03 10:54:46 WARN User Joanna Jankowska logged out.
+2024-03-04 11:57:53 DEBUG User Paweł Mazur logged in.
+2024-03-05 12:00:00 INFO User Agnieszka Wójcik deleted record.
+2024-03-06 13:03:07 ERROR User Marek Lewandowski downloaded report.
+2024-03-07 14:06:14 DEBUG User Paweł Mazur uploaded document.
+2024-03-08 15:09:21 ERROR User Katarzyna Kowalska logged out.
+2024-03-09 16:12:28 ERROR User Jacek Kozłowski requested data export.
+2024-03-10 17:15:35 ERROR User Tomasz Kamiński logged out.
+2024-03-11 18:18:42 WARN User Katarzyna Kowalska uploaded document.
+2024-03-12 19:21:49 DEBUG User Jacek Kozłowski updated profile.
+2024-03-13 20:24:56 INFO User Agnieszka Wójcik modified settings.
+2024-03-14 21:27:03 DEBUG User Marek Lewandowski modified settings.
+2024-03-15 22:30:10 INFO User Joanna Jankowska downloaded report.
+2024-03-16 23:33:17 INFO User Dorota Michalska downloaded report.
+2024-03-17 00:36:24 DEBUG User Marek Lewandowski uploaded document.
+2024-03-18 01:39:31 WARN User Joanna Jankowska modified settings.
+2024-03-19 02:42:38 DEBUG User Grzegorz Krawczyk changed password.
+2024-03-20 03:45:45 WARN User Agnieszka Wójcik accessed dashboard.
+2024-03-21 04:48:52 WARN User Agnieszka Wójcik modified settings.
+2024-03-22 05:51:59 ERROR User Magdalena Kowalczyk logged in.
+2024-03-23 06:54:06 INFO User Tomasz Kamiński requested data export.
+2024-03-24 07:57:13 DEBUG User Agnieszka Wójcik deleted record.
+2024-03-25 08:00:20 DEBUG User Jacek Kozłowski uploaded document.
+2024-03-26 09:03:27 DEBUG User Katarzyna Kowalska changed password.
+2024-03-27 10:06:34 INFO User Agnieszka Wójcik requested data export.
+2024-03-28 11:09:41 WARN User Magdalena Kowalczyk changed password.
+2024-03-01 12:12:48 ERROR User Paweł Mazur deleted record.
+2024-03-02 13:15:55 INFO User Jacek Kozłowski uploaded document.
+2024-03-03 14:18:02 INFO User Grzegorz Krawczyk logged out.
+2024-03-04 15:21:09 ERROR User Dorota Michalska changed password.
+2024-03-05 16:24:16 ERROR User Marek Lewandowski accessed dashboard.
+2024-03-06 17:27:23 DEBUG User Katarzyna Kowalska accessed dashboard.
+2024-03-07 18:30:30 ERROR User Barbara Szymańska logged out.
+2024-03-08 19:33:37 WARN User Marek Lewandowski updated profile.
+2024-03-09 20:36:44 INFO User Marek Lewandowski deleted record.
+2024-03-10 21:39:51 ERROR User Grzegorz Krawczyk updated profile.
+2024-03-11 22:42:58 ERROR User Grzegorz Krawczyk uploaded document.
+2024-03-12 23:45:05 WARN User Joanna Jankowska modified settings.
+2024-03-13 00:48:12 WARN User Piotr Wiśniewski logged in.
+2024-03-14 01:51:19 INFO User Joanna Jankowska updated profile.
+2024-03-15 02:54:26 ERROR User Agnieszka Wójcik changed password.
+2024-03-16 03:57:33 INFO User Tomasz Kamiński changed password.
+2024-03-17 04:00:40 DEBUG User Joanna Jankowska changed password.
+2024-03-18 05:03:47 DEBUG User Tomasz Kamiński modified settings.
+2024-03-19 06:06:54 ERROR User Marek Lewandowski logged in.
+2024-03-20 07:09:01 DEBUG User Jacek Kozłowski deleted record.
+2024-03-21 08:12:08 ERROR User Joanna Jankowska updated profile.
+2024-03-22 09:15:15 WARN User Joanna Jankowska modified settings.
+2024-03-23 10:18:22 INFO User Jacek Kozłowski updated profile.
+2024-03-24 11:21:29 INFO User Marek Lewandowski updated profile.
+2024-03-25 12:24:36 WARN User Jacek Kozłowski deleted record.
+2024-03-26 13:27:43 INFO User Joanna Jankowska logged in.
+2024-03-27 14:30:50 DEBUG User Anna Nowak (123456789) modified settings.
+2024-03-28 15:33:57 ERROR User Katarzyna Kowalska modified settings.
+2024-03-01 16:36:04 INFO User Agnieszka Wójcik changed password.
+2024-03-02 17:39:11 DEBUG User Piotr Wiśniewski logged out.
+2024-03-03 18:42:18 ERROR User Joanna Jankowska logged in.
+2024-03-04 19:45:25 INFO User Jacek Kozłowski uploaded document.
+2024-03-05 20:48:32 WARN User Dorota Michalska downloaded report.
+2024-03-06 21:51:39 ERROR User Joanna Jankowska modified settings.
+2024-03-07 22:54:46 ERROR User Joanna Jankowska changed password.
+2024-03-08 23:57:53 DEBUG User Joanna Jankowska changed password.
+2024-03-09 00:00:00 ERROR User Marek Lewandowski accessed dashboard.
+2024-03-10 01:03:07 INFO User Barbara Szymańska requested data export.
+2024-03-11 02:06:14 DEBUG User Katarzyna Kowalska changed password.
+2024-03-12 03:09:21 ERROR User Katarzyna Kowalska changed password.
+2024-03-13 04:12:28 DEBUG User Katarzyna Kowalska updated profile.
+2024-03-14 05:15:35 DEBUG User Marek Lewandowski downloaded report.
+2024-03-15 06:18:42 WARN User Jacek Kozłowski changed password.
+2024-03-16 07:21:49 INFO User Barbara Szymańska requested data export.
+2024-03-17 08:24:56 WARN User Grzegorz Krawczyk changed password.
+2024-03-18 09:27:03 WARN User Dorota Michalska accessed dashboard.
+2024-03-19 10:30:10 ERROR User Magdalena Kowalczyk accessed dashboard.
+2024-03-20 11:33:17 WARN User Magdalena Kowalczyk uploaded document.
+2024-03-21 12:36:24 INFO User Dorota Michalska uploaded document.
+2024-03-22 13:39:31 INFO User Magdalena Kowalczyk modified settings.
+2024-03-23 14:42:38 ERROR User Jacek Kozłowski logged in.
+2024-03-24 15:45:45 ERROR User Magdalena Kowalczyk modified settings.
+2024-03-25 16:48:52 DEBUG User Joanna Jankowska logged out.
+2024-03-26 17:51:59 INFO User Agnieszka Wójcik logged out.
+2024-03-27 18:54:06 INFO User Tomasz Kamiński downloaded report.
+2024-03-28 19:57:13 INFO User Marek Lewandowski downloaded report.
+2024-03-01 20:00:20 WARN User Barbara Szymańska downloaded report.
+2024-03-02 21:03:27 ERROR User Marek Lewandowski modified settings.
+2024-03-03 22:06:34 ERROR User Dorota Michalska uploaded document.
+2024-03-04 23:09:41 INFO User Tomasz Kamiński logged in.
+2024-03-05 00:12:48 WARN User Barbara Szymańska logged out.
+2024-03-06 01:15:55 DEBUG User Piotr Wiśniewski logged out.
+2024-03-07 02:18:02 DEBUG User Katarzyna Kowalska deleted record.
+2024-03-08 03:21:09 WARN User Katarzyna Kowalska downloaded report.
+2024-03-09 04:24:16 INFO User Jacek Kozłowski logged in.
+2024-03-10 05:27:23 DEBUG User Joanna Jankowska accessed dashboard.
+2024-03-11 06:30:30 DEBUG User Paweł Mazur updated profile.
+2024-03-12 07:33:37 INFO User Joanna Jankowska changed password.
+2024-03-13 08:36:44 INFO User Marek Lewandowski downloaded report.
+2024-03-14 09:39:51 INFO User Marek Lewandowski changed password.
+2024-03-15 10:42:58 DEBUG User Grzegorz Krawczyk downloaded report.
+2024-03-16 11:45:05 WARN User Tomasz Kamiński requested data export.
+2024-03-17 12:48:12 WARN User Tomasz Kamiński uploaded document.
+2024-03-18 13:51:19 INFO User Tomasz Kamiński logged in.
+2024-03-19 14:54:26 INFO User Piotr Wiśniewski modified settings.
+2024-03-20 15:57:33 WARN User Joanna Jankowska requested data export.
+2024-03-21 16:00:40 WARN User Jacek Kozłowski logged out.
+2024-03-22 17:03:47 ERROR User Grzegorz Krawczyk requested data export.
+2024-03-23 18:06:54 ERROR User Joanna Jankowska downloaded report.
+2024-03-24 19:09:01 WARN User Agnieszka Wójcik uploaded document.
+2024-03-25 20:12:08 WARN User Dorota Michalska updated profile.
+2024-03-26 21:15:15 ERROR User Anna Nowak (+48 123 456 789) logged in.
+2024-03-27 22:18:22 WARN User Piotr Wiśniewski logged out.
+2024-03-28 23:21:29 DEBUG User Barbara Szymańska updated profile.
+2024-03-01 00:24:36 INFO User Katarzyna Kowalska accessed dashboard.
+2024-03-02 01:27:43 DEBUG User Paweł Mazur changed password.
+2024-03-03 02:30:50 DEBUG User Piotr Wiśniewski requested data export.
+2024-03-04 03:33:57 WARN User Marek Lewandowski downloaded report.
+2024-03-05 04:36:04 ERROR User Piotr Wiśniewski downloaded report.
+2024-03-06 05:39:11 DEBUG User Magdalena Kowalczyk modified settings.
+2024-03-07 06:42:18 DEBUG User Agnieszka Wójcik logged in.
+2024-03-08 07:45:25 DEBUG User Agnieszka Wójcik uploaded document.
+2024-03-09 08:48:32 WARN User Piotr Wiśniewski uploaded document.
+2024-03-10 09:51:39 ERROR User Katarzyna Kowalska requested data export.
+2024-03-11 10:54:46 DEBUG User Joanna Jankowska changed password.
+2024-03-12 11:57:53 WARN User Joanna Jankowska logged in.
+2024-03-13 12:00:00 INFO User Tomasz Kamiński logged out.
+2024-03-14 13:03:07 WARN User Barbara Szymańska deleted record.
+2024-03-15 14:06:14 INFO User Barbara Szymańska logged in.
+2024-03-16 15:09:21 DEBUG User Tomasz Kamiński changed password.
+2024-03-17 16:12:28 INFO User Paweł Mazur modified settings.
+2024-03-18 17:15:35 WARN User Grzegorz Krawczyk deleted record.
+2024-03-19 18:18:42 ERROR User Magdalena Kowalczyk requested data export.
+2024-03-20 19:21:49 WARN User Tomasz Kamiński deleted record.
+2024-03-21 20:24:56 WARN User Piotr Wiśniewski modified settings.
+2024-03-22 21:27:03 ERROR User Dorota Michalska modified settings.
+2024-03-23 22:30:10 WARN User Joanna Jankowska modified settings.
+2024-03-24 23:33:17 INFO User Grzegorz Krawczyk deleted record.
+2024-03-25 00:36:24 WARN User Katarzyna Kowalska logged in.
+2024-03-26 01:39:31 INFO User Marek Lewandowski uploaded document.
+2024-03-27 02:42:38 INFO User Barbara Szymańska requested data export.
+2024-03-28 03:45:45 INFO User Grzegorz Krawczyk logged in.
+2024-03-01 04:48:52 WARN User Jacek Kozłowski downloaded report.
+2024-03-02 05:51:59 INFO User Jacek Kozłowski logged out.
+2024-03-03 06:54:06 INFO User Grzegorz Krawczyk modified settings.
+2024-03-04 07:57:13 INFO User Anna Nowak (123456789) requested data export.
